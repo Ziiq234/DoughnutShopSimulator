@@ -78,4 +78,6 @@ for (int day = 1; day <= 10; day++)
     Console.WriteLine($"Selling price: £{sellingPrice:F2}");
     int customerAmount = simulator.CalculateCustomers(currentWeather, sellingPrice);
     Console.WriteLine($"Customers today: {customerAmount}");
+    //Customer = 1 Donut Sold.
+    Console.WriteLine($"Donuts Sold: {customeramount}")
 }
