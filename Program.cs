@@ -66,7 +66,7 @@ while (keepPlaying)
 
         if (confirm?.Equals("yes", StringComparison.OrdinalIgnoreCase) != true)
         {
-            Console.WriteLine($"sorry couldn't understand that (you typed {confirm.Trim()}) think you meant to type no bud. Back to the menu you go!");
+            Console.WriteLine($"sorry couldn't understand that (you typed {confirm.Trim()}) think you meant to t. Back to the menu you go!");
             continue;
         }
 
