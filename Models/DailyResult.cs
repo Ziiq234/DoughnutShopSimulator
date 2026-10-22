@@ -21,6 +21,10 @@ public class DailyResult
 
     public int UnsoldDoughnuts { get; init; }
 
+    public int DoughnutsEatenByNathan { get; init; }
+
+    public bool NathanBuyoutOccurred { get; init; }
+
     public decimal SellingPrice { get; init; }
 
     public decimal ProductionCost { get; init; }

@@ -6,6 +6,11 @@ public class GameService
 {
     private readonly Random _random = new();
 
+    public bool ShouldTriggerNathanBuyout(int day)
+    {
+        return day > 3 && _random.Next(1, 101) == 1;
+    }
+
     public Weather GenerateWeather()
     {
         int weatherNumber = _random.Next(0, 5);
@@ -69,21 +74,21 @@ public class GameService
 
     public string GetBusinessRating(decimal totalProfit)
     {
-        if (totalProfit >= 100m)
+        if (totalProfit > 150m)
         {
-            return "Outstanding";
+            return "Doughnut Legend";
         }
 
-        if (totalProfit >= 50m)
+        if (totalProfit > 75m)
         {
-            return "Excellent";
+            return "Doughnut Tycoon";
         }
 
-        if (totalProfit >= 0m)
+        if (totalProfit >= 20m)
         {
-            return "Profitable";
+            return "Doughnut Seller";
         }
 
-        return "Needs improvement";
+        return "Business Beginner";
     }
 }

@@ -10,7 +10,7 @@ public class GameRunner
     private readonly List<DailyResult> _dailyResults = new();
     private decimal _currentBalance = StartingBalance;
 
-    public void Run()
+    public GameSummary? Run(int gameNumber)
     {
         // Main loop
         for (int day = 1; day <= 10; day++)
@@ -48,8 +48,8 @@ public class GameRunner
                 string? choice = Console.ReadLine();
                 if (choice is null)
                 {
-                    Console.WriteLine("Input ended. Exiting simulation.");
-                    return;
+                    Console.WriteLine("U typed nothing btw.");
+                    return null;
                 }
 
                 choice = choice.Trim();
@@ -73,35 +73,55 @@ public class GameRunner
             Console.WriteLine($"Production cost: £{productionCost:F2}");
             Console.WriteLine($"Remaining balance: £{_currentBalance:F2}");
 
-            //selling
             decimal sellingPrice = 0.00m;
+            int customerAmount = 0;
+            int donutsSold = 0;
+            int unsoldDoughnuts = 0;
+            int doughnutsEatenByNathan = 0;
+            decimal salesIncome = 0.00m;
+            decimal eventPenalty = 0.00m;
+            bool nathanBuyoutOccurred = _simulator.ShouldTriggerNathanBuyout(day);
 
-            while (true)
+            if (nathanBuyoutOccurred)
             {
-                Console.Write("How much would you like to sell each doughnut for? £");
+                doughnutsEatenByNathan = donutAmount;
+                eventPenalty = _currentBalance * 0.70m;
+                _currentBalance -= eventPenalty;
 
-                if (!decimal.TryParse(Console.ReadLine(), out sellingPrice) || sellingPrice < 0)
+                Console.WriteLine("\nRandom event: Bought Out By Nathan Smith!");
+                Console.WriteLine($"Nathan ate all {doughnutsEatenByNathan} doughnuts and took 70% of your remaining balance (£{eventPenalty:F2}).");
+                Console.WriteLine($"Balance after Nathan's visit: £{_currentBalance:F2}");
+            }
+            else
+            {
+                while (true)
                 {
-                    Console.WriteLine("Invalid price. Enter a valid price of £0.00 or more.");
-                    continue;
+                    Console.Write("How much would you like to sell each doughnut for? £");
+
+                    if (!decimal.TryParse(Console.ReadLine(), out sellingPrice) || sellingPrice < 0)
+                    {
+                        Console.WriteLine("Invalid price. Enter a valid price of £0.00 or more.");
+                        continue;
+                    }
+
+                    break;
                 }
 
-                break;
+                Console.WriteLine($"Selling price: £{sellingPrice:F2}");
+                customerAmount = _simulator.CalculateCustomers(currentWeather, sellingPrice);
+                Console.WriteLine($"Customers today: {customerAmount}");
+                donutsSold = Math.Min(customerAmount, donutAmount);
+                unsoldDoughnuts = donutAmount - donutsSold;
+                if (donutsSold < customerAmount)
+                {
+                    Console.WriteLine($"You missed out on {customerAmount - donutsSold} customers today due to insufficient stock.");
+                }
+
+                salesIncome = donutsSold * sellingPrice;
+                _currentBalance += salesIncome;
             }
 
-            Console.WriteLine($"Selling price: £{sellingPrice:F2}");
-            int customerAmount = _simulator.CalculateCustomers(currentWeather, sellingPrice);
-            Console.WriteLine($"Customers today: {customerAmount}");
-            int donutsSold = Math.Min(customerAmount, donutAmount);
-            int unsoldDoughnuts = donutAmount - donutsSold;
-            if (donutsSold < customerAmount)
-            {
-                Console.WriteLine($"You missed out on {customerAmount - donutsSold} customers today due to insufficient stock.");
-            }
-
-            decimal salesIncome = donutsSold * sellingPrice;
-            decimal dailyProfit = salesIncome - productionCost;
-            _currentBalance += salesIncome;
+            decimal dailyProfit = salesIncome - productionCost - eventPenalty;
 
             DailyResult result = new()
             {
@@ -111,6 +131,8 @@ public class GameRunner
                 CustomerDemand = customerAmount,
                 DoughnutsSold = donutsSold,
                 UnsoldDoughnuts = unsoldDoughnuts,
+                DoughnutsEatenByNathan = doughnutsEatenByNathan,
+                NathanBuyoutOccurred = nathanBuyoutOccurred,
                 SellingPrice = sellingPrice,
                 ProductionCost = productionCost,
                 SalesIncome = salesIncome,
@@ -126,6 +148,7 @@ public class GameRunner
             Console.WriteLine($"Customer demand: {result.CustomerDemand}");
             Console.WriteLine($"Doughnuts sold: {result.DoughnutsSold}");
             Console.WriteLine($"Unsold doughnuts: {result.UnsoldDoughnuts}");
+            Console.WriteLine($"Doughnuts eaten by Nathan: {result.DoughnutsEatenByNathan}");
             Console.WriteLine($"Selling price: £{result.SellingPrice:F2}");
             Console.WriteLine($"Sales income: £{result.SalesIncome:F2}");
             Console.WriteLine($"Production cost: £{result.ProductionCost:F2}");
@@ -139,16 +162,35 @@ public class GameRunner
         int totalDoughnutsMade = _dailyResults.Sum(result => result.DoughnutsMade);
         int totalDoughnutsSold = _dailyResults.Sum(result => result.DoughnutsSold);
         int totalUnsoldDoughnuts = _dailyResults.Sum(result => result.UnsoldDoughnuts);
+        int totalDoughnutsEatenByNathan = _dailyResults.Sum(result => result.DoughnutsEatenByNathan);
+        int nathanBuyouts = _dailyResults.Count(result => result.NathanBuyoutOccurred);
         string businessRating = _simulator.GetBusinessRating(totalProfit);
 
         Console.WriteLine("Final results after 10 days");
         Console.WriteLine($"Doughnuts made: {totalDoughnutsMade}");
         Console.WriteLine($"Doughnuts sold: {totalDoughnutsSold}");
         Console.WriteLine($"Unsold doughnuts: {totalUnsoldDoughnuts}");
+        Console.WriteLine($"Doughnuts eaten by Nathan: {totalDoughnutsEatenByNathan}");
+        Console.WriteLine($"Nathan Smith buyouts: {nathanBuyouts}");
         Console.WriteLine($"Total sales income: £{totalSalesIncome:F2}");
         Console.WriteLine($"Total production cost: £{totalProductionCost:F2}");
         Console.WriteLine($"Total profit: £{totalProfit:F2}");
         Console.WriteLine($"Final balance: £{_currentBalance:F2}");
         Console.WriteLine($"Business rating: {businessRating}");
+
+        return new GameSummary
+        {
+            GameNumber = gameNumber,
+            DoughnutsMade = totalDoughnutsMade,
+            DoughnutsSold = totalDoughnutsSold,
+            UnsoldDoughnuts = totalUnsoldDoughnuts,
+            DoughnutsEatenByNathan = totalDoughnutsEatenByNathan,
+            NathanBuyouts = nathanBuyouts,
+            TotalSalesIncome = totalSalesIncome,
+            TotalProductionCost = totalProductionCost,
+            TotalProfit = totalProfit,
+            FinalBalance = _currentBalance,
+            BusinessRating = businessRating
+        };
     }
 }
