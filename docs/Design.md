@@ -220,6 +220,20 @@ Production cost
 Daily profit
 Current balance
 
+### FR-18: Store daily results
+The system will store each day's weather, production, sales, costs, profit and closing balance in a collection.
+
+### FR-19: Display final results
+After Day 10, the system will display totals for doughnuts made, sold and unsold, total sales income, production costs, profit and final balance.
+
+### FR-20: Rate the business
+The system will calculate the business rating from total profit over the 10 days:
+
+- £100.00 or more: Outstanding
+- £50.00 to £99.99: Excellent
+- £0.00 to £49.99: Profitable
+- Less than £0.00: Needs improvement
+
 
 ## 7. Non-Functional Requirements
 

@@ -66,4 +66,24 @@ public class GameService
 
         return baseCustomers;
     }
+
+    public string GetBusinessRating(decimal totalProfit)
+    {
+        if (totalProfit >= 100m)
+        {
+            return "Outstanding";
+        }
+
+        if (totalProfit >= 50m)
+        {
+            return "Excellent";
+        }
+
+        if (totalProfit >= 0m)
+        {
+            return "Profitable";
+        }
+
+        return "Needs improvement";
+    }
 }
