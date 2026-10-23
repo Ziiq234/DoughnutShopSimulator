@@ -82,7 +82,7 @@ while (keepPlaying)
 
         if (int.TryParse(ratingInput, out int rating) && rating == 5)
         {
-            Console.WriteLine("A perfect score! Nathan Smith definitely didn't write this prompt. Bye!");
+            Console.WriteLine("A perfect score!");
             break;
         }
 
